@@ -12,17 +12,29 @@
         <link type="text/css" rel="stylesheet" href="themes/calendar_white.css" />
 
 	<!-- helper libraries -->
-	<script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <!-- <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script> -->
+    <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
 
 	<!-- daypilot libraries -->
         <script src="js/daypilot/daypilot-all.min.js" type="text/javascript"></script>
 
 </head>
+<?php
+session_start();
+require( 'util.php' );
+$userid = $_SESSION['uid'];
+if (intval($userid) === 1) { ?>
 <body>
         <div id="header">
 			<div class="bg-help">
 				<div class="inBox">
-					<h1 id="logo">Pain is Beautifull</h1>
+                <form action="login.php" method="post">
+                    <h3 style="color:white">Logged in as <?=$_SESSION['uname'] ?></h3>
+                    <button class="primary" type="submit" name="cmd" value="logout">Logout</button>
+                </form>
 					<hr class="hidden" />
 				</div>
 			</div>
@@ -51,6 +63,13 @@
                 <div id="dp"></div>
             </div>
 
+            <?php } else { 
+              
+              echo "You need to login!<br>";
+              echo '<a href="login.php">To login page</a>';
+                
+                
+            } ?>
             <script>
 
                 var nav = new DayPilot.Navigator("nav");
@@ -67,7 +86,6 @@
                 var dp = new DayPilot.Calendar("dp");
                 dp.locale = "da-dk";
                 dp.viewType = "Week";
-
                 dp.eventDeleteHandling = "Update";
 
                 dp.onEventDeleted = function(args) {
@@ -75,72 +93,41 @@
                         {
                             id: args.e.id()
                         },
-                        function() {
-                            console.log("Deleted.");
-                        });
+                    );
                 };
 
                 dp.onEventMoved = function(args) {
                     $.post("move.php",
-                            {
-                                id: args.e.id(),
-                                newStart: args.newStart.toString(),
-                                newEnd: args.newEnd.toString()
-                            },
-                            function() {
-                                console.log("Moved.");
-                            });
+                        {
+                            id: args.e.id(),
+                            newStart: args.newStart.toString(),
+                            newEnd: args.newEnd.toString()
+                        },
+                    );
                 };
 
                 dp.onEventResized = function(args) {
                     $.post("resize.php",
-                            {
-                                id: args.e.id(),
-                                newStart: args.newStart.toString(),
-                                newEnd: args.newEnd.toString()
-                            },
-                            function() {
-                                console.log("Resized.");
-                            });
+                        {
+                            id: args.e.id(),
+                            newStart: args.newStart.toString(),
+                            newEnd: args.newEnd.toString()
+                        },
+                    );
                 };
 
-                // event creating
-                dp.onTimeRangeSelected = function(args) {
-                    var name = prompt("New event name:", "Event");
-                    dp.clearSelection();
-                    if (!name) return;
-                    var e = new DayPilot.Event({
-                        start: args.start,
-                        end: args.end,
-                        id: DayPilot.guid(),
-                        resource: args.resource,
-                        text: name
-                    });
-                    dp.events.add(e);
-
-                    
-                    $.post("create.php",
-                            {
-                                start: args.start.toString(),
-                                end: args.end.toString(),
-                                name: name
-                            },
-                            function() {
-                                console.log("Created.");
-                            });
-                    
-                };
-                
-                dp.onEventClick = function(args) {
+                dp.onTimeRangeSelected = function (args) {
                 var modal = new DayPilot.Modal();
                 modal.onClosed = function(args) {
-                // reload all events
-                var result = args.result;
-                if (result && result.status === "OK") {
-                loadEvents();
-                }
+                    loadEvents();
+                    dp.clearSelection();
+                    var data = args.result;
+                    if (data && data.result === "OK") { 
+                        loadEvents(); 
+                        dp.message(data.message); 
+                    }
                 };
-                modal.showHtml('something here');
+                modal.showUrl("create_modal.php?start=" + args. start + "&end=" + args.end);
                 };
 
                 dp.init();
@@ -151,10 +138,18 @@
                     dp.events.load("events.php");
                 }
 
+                dp.onEventClick = function(args) {
+                    var modal = new DayPilot.Modal();
+                    modal.onClosed = function(args) {
+                        loadEvents();
+                    };
+                    modal.showUrl("modal.php?id=" + args.e.id());
+                    
+                };
             </script>
 
             <script type="text/javascript">
-            $(document).ready(function() {
+            $(document).ready(function() {  
                 $("#theme").change(function(e) {
                     dp.theme = this.value;
                     dp.update();

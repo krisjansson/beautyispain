@@ -5,7 +5,7 @@ $insert = "UPDATE events SET start = ?, end = ? WHERE id = ?";
 
 $stmt = $db->prepare($insert);
 
-$stmt->bind_param(':ssi', $_POST['newStart'], $_POST['newEnd'], $_POST['id']);
+$stmt->bind_param('ssi', $_POST['newStart'], $_POST['newEnd'], $_POST['id']);
 $stmt->execute();
 
 class Result {}
