@@ -1,0 +1,47 @@
+
+html,
+body,
+header,
+.carousel {
+  height: 60vh;
+}
+
+@media (max-width: 740px) {
+  html,
+  body,
+  header,
+  .carousel {
+    height: 60vh;
+  }
+}
+
+@media (min-width: 800px) and (max-width: 850px) {
+  html,
+  body,
+  header,
+  .carousel {
+    height: 60vh;
+  }
+}
+
+.carousel {
+  margin: 0rem;
+  border-radius: 0 !important;
+
+}
+@media only screen and (min-width: 992px) {
+  .carousel {
+    margin: 1.5rem !important;
+    .carousel-inner {
+      border-radius: .25rem !important;
+    }
+  }
+  .carousel-inner {
+    border-radius: .25rem !important;
+  }
+
+}
+
+  iframe {
+    filter: saturate(50%)	 !important;
+  }

@@ -1,0 +1,29 @@
+
+.card {
+    max-width: 20rem !important;
+}
+
+// FROM NAV ANITMAIONT
+
+
+img {
+    height: 25rem !important;
+    width: 20rem;
+    object-fit: cover;
+}
+
+
+.btn-outline-custom {
+    border: 1.5px solid red;
+    color: black;
+    border-radius: 0;
+    
+}
+
+@media only screen and (min-width: 992px) {
+    .jumbotron {
+      margin: 1.5rem !important;
+      border-radius: .25rem !important;
+    }
+  
+  }
