@@ -1,0 +1,41 @@
+.service {
+    width: 320px;
+    background: #f8f8f8;
+    transition: all .5s ease-in-out;
+}
+
+
+.more-w {
+    width: 680px !important;
+    transition: all 1s ease-in-out;
+}
+.hidden {
+    display: none;
+}
+
+.b-card {
+    box-shadow: 0px 4px 10px -1px rgba(0,0,0,0.21) !important;
+    &:hover {        
+        box-shadow: 0px 7px 25px -1px rgba(0,0,0,0.21) !important;
+        cursor: default;
+    }
+}
+.close {
+    position: absolute;
+    top: 0 !important;
+    right: 0 !important;
+        &:hover {        
+            box-shadow: 0px 7px 25px -1px rgba(0,0,0,0.21) !important;
+            cursor: pointer !important;
+        }
+    }
+
+u{
+    &:hover {
+        cursor: pointer;
+    }
+}
+.b-icons {
+    height: 224px !important;
+    object-fit: contain;
+}
