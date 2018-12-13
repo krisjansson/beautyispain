@@ -203,15 +203,7 @@
            
                         </div>
                     </div>
-                    <!-- <div class="col-lg-4 col-md-4 ">
-                            <div class="form-group">
-                                <label for="behandling">Behandling *</label>    
-                                <select id="ddl2" class="custom-select browser-default" required>
-                                </select>    
-                                <div class="invalid-feedback">Vælg en behandling!</div>
-    
-                            </div>
-                        </div> -->
+
                     <div class="justify-content-center col-12 d-flex" >
                         <button class="btn btn-custom text-white rounded ">Search<i class="fas fa-search pl-2 "></i></button>
                     </div>
@@ -320,14 +312,7 @@
                         </div>
                     </div>
     
-                    <!-- Behandler -->
-                    <div class="form-group ">
-                        <label for="behandler">Behandler</label>
-                        <select id="behandler" class="custom-select browser-default" required>
-                            <option value="Voksbehandling">Christina Green</option>
-                        </select>
-                        <div class="invalid-feedback">Vælg en behandler!</div>
-                    </div>
+
     
                     <!-- Behandling -->
                     <div class="form-group ">
@@ -346,7 +331,15 @@
                         </select>
                     <div class="invalid-feedback">Vælg en behandling!</div>
                 </div><!-- Bestlings detaljer END -->
-    
+
+                <!-- Behandler -->
+                <div class="form-group ">
+                    <label for="behandler">Behandler</label>
+                    <select id="behandler" class="custom-select browser-default" required>
+                        <option value="Voksbehandling">Christina Green</option>
+                    </select>
+                    <div class="invalid-feedback">Vælg en behandler!</div>
+                </div>
                 </section>
     
                 <!-- Personlige detaljer -->
@@ -363,26 +356,32 @@
                     </div>
     
                     <!-- Address -->
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="inputAddress">Address</label>
                         <input type="text" class="form-control" id="inputAddress" placeholder="test 4, 4tv 1000">
+                    </div> -->
+                    <div class="">
+                        
+                        <!-- Email address -->
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email*" required>
+                        </div>
+
+                        <!-- Telephone number -->
+                        <div class="form-group">
+                            <label for="tel-input" class="">Telephone</label>
+                            <input class="form-control" type="tel" value="" id="tel-input" placeholder="Telefon nummer">
+                        </div>
                     </div>
                 </section>
     
                 <!-- Kontakt info -->
                 <section id="person-oplysniger" class="mt-4 col-md-4">
-                    <h2 class="mb-3">Kontakt info</h2>
-    
-                    <!-- Email address -->
+                <h2 class="mb-3">Kommentar</h2>
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Email address</label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email*" required>
-                    </div>
-    
-                    <!-- Telephone number -->
-                    <div class="form-group">
-                        <label for="tel-input" class="">Telephone</label>
-                        <input class="form-control" type="tel" value="" id="tel-input" placeholder="Telefon nummer">
+                        <label for="comment">Kommentar:</label>
+                        <textarea class="form-control" rows="5" id="comment"></textarea>
                     </div>
                 </section>
     
@@ -519,69 +518,6 @@
             $('[data-toggle="tooltip"]').tooltip();   
         });
     </script>
-
-    <!-- IF WE WANT 2 DROPDOWN HIERARKI  -->
-   <!-- <script>
-            function configureDropDownLists(ddl1, ddl2) {
-                var voksbehandling = ['Black 01:00:00', 'White 02:00:00', 'Blue'];
-                var hands = ['Square', 'Circle', 'Triangle'];
-                var vipperogbryn = ['John', 'David', 'Sarah'];
-                var ansigtsbehandlinger = ['Basis Ansigtsbehandling', 'David', 'Sarah'];
-                var rygbehandlinger = ['John', 'David', 'Sarah'];
-                var pakker = ['John', 'David', 'Sarah'];
-    
-                switch (ddl1.value) {
-                    case 'Voksbehandling':
-                    ddl2.options.length = 0;
-                    for (i = 0; i < voksbehandling.length; i++) {
-                        createOption(ddl2, voksbehandling[i], voksbehandling[i]);
-                    }
-                    break;
-                    case 'Hands':
-                    ddl2.options.length = 0;
-                    for (i = 0; i < hands.length; i++) {
-                        createOption(ddl2, hands[i], hands[i]);
-                    }
-                    break;
-                    case 'Vipperogbryn':
-                    ddl2.options.length = 0;
-                    for (i = 0; i < vipperogbryn.length; i++) {
-                        createOption(ddl2, vipperogbryn[i], vipperogbryn[i]);
-                    }
-                    break;
-                    case 'Ansigtsbehandlinger':
-                    ddl2.options.length = 0;
-                    for (i = 0; i < ansigtsbehandlinger.length; i++) {
-                        createOption(ddl2, ansigtsbehandlinger[i], ansigtsbehandlinger[i]);
-                    }
-                    break;
-                    case 'Rygbehandlinger':
-                    ddl2.options.length = 0;
-                    for (i = 0; i < rygbehandlinger.length; i++) {
-                        createOption(ddl2, rygbehandlinger[i], rygbehandlinger[i]);
-                    }
-                    break;
-                    case 'Pakker':
-                    ddl2.options.length = 0;
-                    for (i = 0; i < pakker.length; i++) {
-                        createOption(ddl2, pakker[i], pakker[i]);
-                    }
-                    break;
-                    default:
-                    ddl2.options.length = 0;
-                    break;
-                }
-    
-                }
-    
-                function createOption(ddl, text, value) {
-                    var opt = document.createElement('option');
-                    opt.value = value;
-                    opt.text = text;
-                    ddl.options.add(opt);
-                    }
-            </script> -->
-
     <!-- DATE TIME PICKER UI -->
     <script type="text/javascript">
       $(function () {
