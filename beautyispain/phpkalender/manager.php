@@ -1,4 +1,4 @@
-<!DOCTYPE html lang="dk-DK">
+﻿<!DOCTYPE html lang="dk-DK">
 <html>
 <head>
     <title>Beauty BY Green</title>
@@ -48,7 +48,7 @@ if (intval($userid) === 1) { ?>
                 <div id="nav"></div>
             </div>
             <div style="margin-left: 160px;">
-                <h1>Kundebookning</h1>
+            <h1>Manager side</h1>
 
                 <div class="space">
                         Theme: <select onChange="if (this.options[this.selectedIndex].value) window.location.href=this.options[this.selectedIndex].value">
@@ -58,6 +58,7 @@ if (intval($userid) === 1) { ?>
                             <option value="settime.php">Sæt timer</option>
                         </select>
                 </div>
+                
 
                 <div id="dp"></div>
             </div>
@@ -84,71 +85,82 @@ if (intval($userid) === 1) { ?>
                 nav.init();
 
                 var dp = new DayPilot.Calendar("dp");
+                dp.locale = "da-dk";
                 dp.businessBeginsHour = 8;
-                dp.businessEndsHour = 17;
+                dp.businessEndsHour = 20;
                 dp.showNonBusiness = false;
                 dp.scale = "CellDuration";
                 dp.cellDuration = 30;
-                dp.locale = "da-dk";
                 dp.viewType = "Week";
-                dp.eventDeleteHandling = "Disabled";
-                dp.timeRangeSelectedHandling = "Disabled";
-                dp.eventMoveHandling = "Disabled";
-                dp.eventResizeHandling = "Disabled";
+                dp.eventDeleteHandling = "Update";
                 dp.allowEventOverlap = false;
+                
+
+                dp.onEventDeleted = function(args) {
+                    $.post("delete.php",
+                        {
+                            id: args.e.id()
+                        },
+                    );
+                };
+
+                dp.onEventMoved = function(args) {
+                    $.post("move.php",
+                        {
+                            id: args.e.id(),
+                            newStart: args.newStart.toString(),
+                            newEnd: args.newEnd.toString()
+                        },
+                    );
+                };
+
+                dp.onEventResized = function(args) {
+                    $.post("resize.php",
+                        {
+                            id: args.e.id(),
+                            newStart: args.newStart.toString(),
+                            newEnd: args.newEnd.toString()
+                        },
+                    );
+                };
+
+                dp.onTimeRangeSelected = function (args) {
+                var modal = new DayPilot.Modal();
+                modal.onClosed = function(args) {
+                    loadEvents();
+                    dp.clearSelection();
+                    var data = args.result;
+                    if (data && data.result === "OK") { 
+                        loadEvents(); 
+                        dp.message(data.message); 
+                    }
+                };
+                modal.showUrl("create_modal.php?start=" + args. start + "&end=" + args.end);
+                };
                 
                 dp.init();
 
                 loadEvents();
 
                 function loadEvents() {
-
-                    dp.events.load("kundeevents.php");
+                    dp.events.load("events.php");
                     
                 }
-                
 
-                // dp.onEventClick = function(args) {
-                //     var modal = new DayPilot.Modal();
-                //     modal.onClosed = function(args) {
-                //         loadEvents();
-                //     };
-                //     modal.showUrl("kundemodal.php?id=" + args.e.id());
-                // };
-
-
+                dp.onEventClick = function(args) {
+                    var modal = new DayPilot.Modal();
+                    modal.onClosed = function(args) {
+                        loadEvents();
+                    };
+                    modal.showUrl("modal.php?id=" + args.e.id());
+                    
+                };
             </script>
 
-
+           
 
         </div>
         <div class="clear">
-
-           
-            <form id="f" style="padding:20px;" action="pagebooking.php" method="post" enctype="multipart/form-data">
-            <div><input type="hidden" id="status" name="status" value="free" /></div>
-            <h1>Søg behandlingstider</h1>
-            <div>Behandling: </div>
-            
-            <div>Behandlings længde: </div>
-            <select id='time' name="bhtime">
-                <option value="00:15:00">15 min</option>
-                <option value="00:30:00">30 min</option>
-                <option value="00:45:00">45 min</option>
-                <option value="01:00:00">1 time</option>
-                <option value="01:15:00">1 time og 15 min</option>
-                <option value="01:30:00">1 time og 30 min</option>
-                <option value="01:45:00">1 time og 45 min</option>
-                <option value="02:00:00">2 timer</option>
-            </select>
-
-            <!-- <div>Start:</div>
-            <div><input type="text" id="start" name="start" /></div>
-            <div>Slut:</div>
-            <div><input type="text" id="end" name="end" /></div> -->
-            <div class="space"><input type="submit" value="Søg" /> <a href="javascript:close();">Cancel</a></div>
-       
-
         </div>
 
 </body>

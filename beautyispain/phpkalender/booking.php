@@ -1,4 +1,8 @@
-<!DOCTYPE HTML>
+<?php
+session_start();
+ini_set('display_errors', true);
+require('_db.php');
+?><!DOCTYPE HTML>
 <html>
         <head>
                 <meta charset="utf-8">
@@ -47,7 +51,7 @@
             
 
             </head>
-            
+           
             <body>
               <div id="wptime-plugin-preloader" style="background-color: rgba(0,0,0, 0.8)"></div>
               <!-- Navbar -->
@@ -117,16 +121,21 @@
         </section>  
         <!-- Search Section -->
          <div class="container mt-5">
+                <?php 
+                if (!isset($_POST['form_search']) AND (!isset($_POST['form_timeselect']))){
+                ?>
               <h2 class="text-center mb-5">Vælg dato og Behandling</h2>
             <section id="booking-form" class="">
+
                 
-                <form action="" class="needs-validation row justify-content-center" novalidate>
+                <form action="<?=htmlspecialchars($_SERVER["PHP_SELF"])?>" method="post" enctype="multipart/form-data" class="needs-validation row justify-content-center" novalidate>
+                    <input type="hidden" name="form_search" value="form_search" /> 
                     <div class="col-lg-4 col-md-6 ">
                         <!-- DATO -->
                         <div class="form-group">
                             <label for="dato">Dato *</label>
                             <div class="input-group date" id="datetimepicker4" data-target-input="nearest">
-                                <input id="dato" type="text" class="form-control datetimepicker-input" data-target="#datetimepicker4" required/>
+                                <input id="dato" type="datetime" name="date" class="form-control datetimepicker-input" data-target="#datetimepicker4" required/>
                                 <div class="input-group-append" data-target="#datetimepicker4" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
                                 </div>
@@ -137,12 +146,12 @@
                     <div class="col-lg-4 col-md-6 ">
                         <div class="form-group">
                             <label for="behandling">Behandling *</label>
-                            <select id="ddl" class="custom-select browser-default" required>
+                            <select id="ddl" name="bhtime4" class="custom-select browser-default" required>
                                 <option value="">Vælg behandling</option>
 
                                 <option value="" class="font-weight-bold h5">Voksbehandling</option>
                                 <option value="00:45:00 Helt ben" >Helt ben 45min</option>
-                                <option value="00:60:00  Helt ben, inkl bikinilinje" >Helt ben, inkl bikinilinje 60min</option>
+                                <option value="00:60:00 Helt ben, inkl bikinilinje" >Helt ben, inkl bikinilinje 60min</option>
                                 <option value="00:30:00 Ben fra knæ & ned" >Ben fra knæ & ned 30min</option>
                                 <option value="00:30:00 Bikini" >Bikini 30min</option>
                                 <option value="00:45:00 Tanga" >Tanga 45min</option>
@@ -211,8 +220,12 @@
     
             </section> <!-- Search form end -->
     
-            <hr class="my-5">
+                <?php } 
             
+            if (isset($_POST['form_search'])){
+    
+            ?>
+
           <!--  BEHANDLER SECTION -->
             <section class="mb-5 mt-5" >
               <h2 class="text-center">Lediger datoer og tidspunkter</h2>
@@ -223,173 +236,188 @@
                 <div class="border-left"></div>
             
                 <!-- Forskellige datoer -->
-                <form action="book.php" method="post" class="needs-validation my-4 mx-4" novalidate>
-                        <input type="hidden"  name="date" value="123>" />
-                        <input type="hidden"  name="id" value="23432" />
-                        <input type="hidden"  name="endtime" value="ererttre" />
-                        <input type="hidden"  name="duration" value="etr" />
-        
-                        <h2>29/12/2018</h2>
-                        <div class="form-group">
-                            <label for="behandlingen">Behandling valgt</label>
-                            <input name="behandlingen" type="text" value="Kropsexoliering" class="form-control bg-f5 disabled">
-                            <div>
-                                    <label for="endtime" class="mt-1">Længde</label>
-                                    <input name="behandlingen" type="text" value="60min" class="form-control bg-f5 disabled">
             
-                                <label for="starttime" class="mt-2">Vælg tidspunkt</label>
-                                <select name="starttime"  class="custom-select browser-default " required>
-                                    <option value="09:00">09:00</option>
-                                    <option value="10:00">10:00</option>
-                                    <option value="11:00">11:00</option>
-                                </select>
-                            </div>
+            
+            <?php
+             
+             
+                $bhtime = filter_input(INPUT_POST, "bhtime4") or die('Missing or illegal bhtime4');
+                $startDate = filter_input(INPUT_POST, 'date') or die('Missing or illegal parameter8');
     
-                            <div class="invalid-feedback">Vælg en behandling!</div>
-                        </div>
-                        <button type="submit" class="btn btn-brand m-0 w-100 py-2">book</button>
-                    </form>
+                $onlyBhtime = substr($bhtime, 0, 8);
+                echo $onlyTreatment = substr($bhtime, 9);
+            
+                $insert = "SELECT id, start, end from events WHERE duration >= ? AND status = 'free' AND start >= ? ORDER BY start 
+                LIMIT 8"; //Number of avalible dates
+                $stmt = $db->prepare($insert);
+                $stmt->bind_param('ss', $onlyBhtime, $startDate);
+                $stmt->execute();
+                $stmt->store_result();
+                $num_of_rows = $stmt->num_rows;
+                $stmt->bind_result($id, $startHole, $endHole);
+    
+                while ($stmt->fetch()) {
+                    
+                    $date = substr($startHole, 0, 10);
+                    //duration in minuts
+                    sscanf($onlyBhtime, "%d:%d:%d", $hours, $minutes, $seconds);
+                    $durToSec = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+                    $durInMin = ($durToSec/60). 'minutes'. '<br>'; 
+    
+                    //duration minus closingtime.
+                    $latestStartTime = (new DateTime($endHole))->sub(DateInterval::createFromDateString($durInMin))->format("Y-m-d H:i:s");//duration minus closingtime.
+    
+                    $now = new DateTime($startHole);
+                    $latest = new DateTime($latestStartTime);
+                    
+    
+                    while ($now <= $latest) {
+                    ?><form action="<?=htmlspecialchars($_SERVER["PHP_SELF"])?>" method="post" enctype="multipart/form-data" class="needs-validation my-4 mx-4" novalidate>
+                            <input type="hidden" name="form_timeselect" value="form_timeselect" /> 
+                            <input type="hidden" name="id4" value="<?php echo $id ?>" /> 
+                            <input type="hidden" name="start" value="<?php echo $startHole ?>" /> 
+                            <input type="hidden" name="end" value="<?php echo $endHole ?>" /> 
+                            <h2><input name="startday1" type="text" value="<?php echo $startHole ?>" class="form-control bg-f5 disabled"></h2>
+                            <div class="form-group">
+                                <label for="behandlingen">Behandling valgt</label>
+                                <input name="treatment" type="text" value="<?php echo $onlyTreatment ?>" class="form-control bg-f5 disabled">
+                                <div>
+                                        <label for="endtime" class="mt-1">Længde</label>
+                                        <input name="behandlingstid" type="text" value="<?php echo $onlyBhtime ?>" class="form-control bg-f5 disabled">
+                
+                                    <label for="starttime" class="mt-2">Vælg tidspunkt</label>
+                                    <select name="startselect" class="custom-select browser-default " required><?php
+                                        while ($now <= $latest) {
+                                        echo "<option>".$now->format("Y-m-d H:i:s")."</option>";
+                                        $now->modify('+15 minutes');
+                                        }?></select>
+                                </div>
+                                <div class="invalid-feedback">Vælg en behandling!</div>
+                            </div>
+                            <button type="submit" class="btn btn-brand m-0 w-100 py-2">book</button>
+                        </form><?php } 
+                }
+             }
+             ?>
                 <!-- Line divider -->
                 <div class="border-left"></div>
 
-                <!-- Forskellige datoer -->
-                <form action="book.php" method="post" class="needs-validation my-4 mx-4" novalidate>
-                        <input type="hidden"  name="date" value="123>" />
-                        <input type="hidden"  name="id" value="23432" />
-                        <input type="hidden"  name="endtime" value="ererttre" />
-                        <input type="hidden"  name="duration" value="etr" />
         
-                        <h2>29/12/2018</h2>
-                        <div class="form-group">
-                            <label for="behandlingen">Behandling valgt</label>
-                            <input name="behandlingen" type="text" value="Kropsexoliering" class="form-control bg-f5 disabled">
-                            <div>
-                                    <label for="endtime" class="mt-1">Længde</label>
-                                    <input name="behandlingen" type="text" value="60min" class="form-control bg-f5 disabled">
-            
-                                <label for="starttime" class="mt-2">Vælg tidspunkt</label>
-                                <select name="starttime"  class="custom-select browser-default " required>
-                                    <option value="09:00">09:00</option>
-                                    <option value="10:00">10:00</option>
-                                    <option value="11:00">11:00</option>
-                                </select>
-                            </div>
-
-                            <div class="invalid-feedback">Vælg en behandling!</div>
-                        </div>
-                        <button type="submit" class="btn btn-brand m-0 w-100 py-2">book</button>
-                    </form>
-            
-                </section>
-          
             <hr class="my-5">
-    
-                    <!-- BOOTSTRAP FORM -->
-            <form action="" class="needs-validation row mb-5" novalidate>  
-                <section id="bestilling-detaljer" class="col-md-4 mt-4">        
-                    <h2 class="mb-3">Bestillings detaljer</h2>
-    
-                    <!-- DATO -->
-                    <div class="form-group">
-                        <label for="dato">Dato</label>
-                        <div class="input-group date" id="datetimepicker5" data-target-input="nearest">
-                            <input id="dato" type="text" class="form-control datetimepicker-input" data-target="#datetimepicker5" required disabled/>
-                            <div class="input-group-append" data-target="#datetimepicker5" data-toggle="datetimepicker">
-                                <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <!-- Tidspunkt -->
-                    <div class="form-group">
-                        <label for="tidspunkt">Tidspunkt</label>
-                        <div class="input-group date" id="datetimepicker3" data-target-input="nearest">
-                        
-                            <input id="tidspunkt" type="text" class="form-control datetimepicker-input" data-target="#datetimepicker3" required disabled/>
-                            <div class="input-group-append" data-target="#datetimepicker3" data-toggle="datetimepicker">
-                                <div class="input-group-text"><i class="far fa-clock"></i></div>
-                            </div>
-                        </div>
-                    </div>
-    
 
-    
-                    <!-- Behandling -->
+            <?php
+
+            if (isset($_POST['form_timeselect'])){
+                $id = filter_input(INPUT_POST, 'id4') or die('Missing or illegal id');
+                $choosenday = filter_input(INPUT_POST, 'startday1') or die('Missing or illegal chooseday');
+                $treatment = filter_input(INPUT_POST, 'treatment') or die('Missing or illegal treatment');
+                $onlyBhtime = filter_input(INPUT_POST, 'behandlingstid') or die('Missing or illegal duration');
+                $treatmentStart = filter_input(INPUT_POST, 'startselect') or die('Missing or illegal treatmentstart');
+                $startHole = filter_input(INPUT_POST, 'start') or die('Missing or illegal treatmentstart');
+                $endHole = filter_input(INPUT_POST, 'end') or die('Missing or illegal treatmentstart');
+                ?>
+        
+                        <!-- BOOTSTRAP FORM -->
+                <form action="kundebook.php" method="post" enctype="multipart/form-data" class="needs-validation row mb-5" novalidate>  
+                    <input type="hidden" name="kundeformID" value="<?php echo $id ?>" /> 
+                    <input type="hidden" name="onlyBhtime" value="<?php echo $onlyBhtime ?>" /> 
+                    <input type="hidden" name="start" value="<?php echo $startHole ?>" /> 
+                    <input type="hidden" name="end" value="<?php echo $endHole ?>" /> 
+
+
+                    <section id="bestilling-detaljer" class="col-md-4 mt-4">        
+                        <h2 class="mb-3">Bestillings detaljer</h2>
+        
+                        <!-- DATO -->
+                        <div class="form-group">
+                            <label for="dato">Dato</label>
+                            <div class="input-group date" id="datetimepicker5">
+                                <input id="dato" type="text" name="date" value="<?php echo $choosenday ?>" class="form-control" data-target="#datetimepicker5" required/>
+                                <div class="input-group-append" data-target="#datetimepicker5" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Tidspunkt -->
+                        <div class="form-group">
+                            <label for="tidspunkt">Tidspunkt</label>
+                            <div class="input-group date" id="datetimepicker3">
+                            
+                                <input id="tidspunkt" type="text" name="startselect4" value="<?php echo $treatmentStart ?>" class="form-control datetimepicker-input" data-target="#datetimepicker3" required/>
+                                <div class="input-group-append" data-target="#datetimepicker3" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="far fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Behandling -->
+                        <div class="form-group ">
+                            <label for="behandling">Behandling</label>
+                            <input id="behandling" name="treatment" value="<?php echo $treatment ?>" class="custom-select browser-default" required>
+                        <div class="invalid-feedback">Vælg en behandling!</div>
+                    </div><!-- Bestlings detaljer END -->
+
+                    <!-- Behandler -->
                     <div class="form-group ">
-                        <label for="behandling">Behandling</label>
-                        <select id="behandling"  class="custom-select browser-default" required disabled>
-                            <option value="">Vælg behandling</option>
-                            <option value="Voksbehandling">Voksbehandling</option>
-                            <option value="Intim-voks">Intim voks (både mænd og kvinder)</option>
-                            <option value="Negle">Negle (shellac)</option>
-                            <option value="Vipper">Vipper</option>
-                            <option value="Bryn">Bryn</option>
-                            <option value="Ansigtsbehandlinger">Ansigtsbehandlinger</option>
-                            <option value="Rygbehandlinger">Rygbehandlinger</option>
-                            <option value="Manicure">Manicure</option>
-                            <option value="Pedicure">Pedicure</option>
+                        <label for="behandler">Behandler</label>
+                        <select id="behandler" class="custom-select browser-default" required>
+                            <option value="Voksbehandling">Christina Green</option>
                         </select>
-                    <div class="invalid-feedback">Vælg en behandling!</div>
-                </div><!-- Bestlings detaljer END -->
-
-                <!-- Behandler -->
-                <div class="form-group ">
-                    <label for="behandler">Behandler</label>
-                    <select id="behandler" class="custom-select browser-default" required>
-                        <option value="Voksbehandling">Christina Green</option>
-                    </select>
-                    <div class="invalid-feedback">Vælg en behandler!</div>
-                </div>
-                </section>
-    
-                <!-- Personlige detaljer -->
-                <section id="person-oplysniger" class="mt-4 col-md-4">
-                    <h2 class="mb-3">Personlige detaljer</h2>
-    
-                    <div class="form-group">
-                        <label for="validationServer013">Navn</label>
-                        <input type="text" class="form-control" id="validationServer013" placeholder="Dit navn *"
-                        value="" required>
-                        <div class="invalid-feedback">
-                            Navn er nødventigt!
-                        </div>
+                        <div class="invalid-feedback">Vælg en behandler!</div>
                     </div>
-    
-                    <!-- Address -->
-                    <!-- <div class="form-group">
-                        <label for="inputAddress">Address</label>
-                        <input type="text" class="form-control" id="inputAddress" placeholder="test 4, 4tv 1000">
-                    </div> -->
-                    <div class="">
-                        
-                        <!-- Email address -->
+                    </section>
+        
+                    <!-- Personlige detaljer -->
+                    <section id="person-oplysniger" class="mt-4 col-md-4">
+                        <h2 class="mb-3">Personlige detaljer</h2>
+        
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Email address</label>
-                            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email*" required>
+                            <label for="validationServer013">Navn</label>
+                            <input type="text" class="form-control" id="validationServer013" placeholder="Dit navn *" name="customername" value="" required>
+                            <div class="invalid-feedback">
+                                Navn er nødventigt!
+                            </div>
                         </div>
+        
+                        <!-- Address -->
+                        <!-- <div class="form-group">
+                            <label for="inputAddress">Address</label>
+                            <input type="text" class="form-control" id="inputAddress" placeholder="test 4, 4tv 1000">
+                        </div> -->
+                        <div class="">
+                            
+                            <!-- Email address -->
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Email address</label>
+                                <input type="email" class="form-control" name="email" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email*" required>
+                            </div>
 
-                        <!-- Telephone number -->
-                        <div class="form-group">
-                            <label for="tel-input" class="">Telephone</label>
-                            <input class="form-control" type="tel" value="" id="tel-input" placeholder="Telefon nummer">
+                            <!-- Telephone number -->
+                            <div class="form-group">
+                                <label for="tel-input" class="">Telephone</label>
+                                <input class="form-control" type="tel" name="phone" value="" id="tel-input" placeholder="Telefon nummer">
+                            </div>
                         </div>
+                    </section>
+        
+                    <!-- Kontakt info -->
+                    <section id="person-oplysniger" class="mt-4 col-md-4">
+                    <h2 class="mb-3">Kommentar</h2>
+                        <div class="form-group">
+                            <label for="comment">Kommentar:</label>
+                            <textarea class="form-control" name ="comment" rows="5" id="comment"></textarea>
+                        </div>
+                    </section>
+        
+                    <div class="d-flex justify-content-center col-12">
+                        <button class="btn btn-custom rounded tex" type="submit">Opret en reservation</button>
                     </div>
-                </section>
-    
-                <!-- Kontakt info -->
-                <section id="person-oplysniger" class="mt-4 col-md-4">
-                <h2 class="mb-3">Kommentar</h2>
-                    <div class="form-group">
-                        <label for="comment">Kommentar:</label>
-                        <textarea class="form-control" rows="5" id="comment"></textarea>
-                    </div>
-                </section>
-    
-                <div class="d-flex justify-content-center col-12">
-                    <button class="btn btn-custom rounded tex" type="submit">Opret en reservation</button>
-                </div>
-            </form>
+                </form>
+            <?php } ?>
+
         </div>    <!-- CONTAINER END -->
+        
     </main>
 
     <!--Footer-->
@@ -509,7 +537,7 @@
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="js/mdb.min.js"></script>
     <!-- Day Pilot -->
-    <script src="js/daypilot-all.min.js"></script>
+    <script src="js/daypilot/daypilot-all.min.js"></script>
     <!-- Tempus Date time picker -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js"></script>
@@ -522,7 +550,7 @@
     <script type="text/javascript">
       $(function () {
         $('#datetimepicker4').datetimepicker({
-            format: 'L',
+            format: 'YYYY-M-D HH:mm:SS',
             daysOfWeekDisabled: [0, 6]
         });
       });

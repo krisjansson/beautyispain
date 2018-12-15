@@ -48,9 +48,9 @@ if (intval($userid) === 1) { ?>
                 <div id="nav"></div>
             </div>
             <div style="margin-left: 160px;">
-                <h1>Kundebookning</h1>
-
+                
                 <div class="space">
+                        <h1>Settime skema</h1>
                         Theme: <select onChange="if (this.options[this.selectedIndex].value) window.location.href=this.options[this.selectedIndex].value">
                             <option value="">- Vælg side -</option>
                             <option value="index.php">Kundebookning</option>
@@ -58,6 +58,7 @@ if (intval($userid) === 1) { ?>
                             <option value="settime.php">Sæt timer</option>
                         </select>
                 </div>
+                
 
                 <div id="dp"></div>
             </div>
@@ -84,71 +85,75 @@ if (intval($userid) === 1) { ?>
                 nav.init();
 
                 var dp = new DayPilot.Calendar("dp");
+                dp.locale = "da-dk";
                 dp.businessBeginsHour = 8;
-                dp.businessEndsHour = 17;
+                dp.businessEndsHour = 20;
                 dp.showNonBusiness = false;
                 dp.scale = "CellDuration";
                 dp.cellDuration = 30;
-                dp.locale = "da-dk";
                 dp.viewType = "Week";
-                dp.eventDeleteHandling = "Disabled";
-                dp.timeRangeSelectedHandling = "Disabled";
-                dp.eventMoveHandling = "Disabled";
-                dp.eventResizeHandling = "Disabled";
+                dp.eventDeleteHandling = "Update";
                 dp.allowEventOverlap = false;
+                
+
+                dp.onEventDeleted = function(args) {
+                    $.post("settime_delete.php",
+                        {
+                            id: args.e.id()
+                        },
+                    );
+                };
+
+                dp.onTimeRangeSelected = function (args) {
+               
+                    dp.clearSelection();
+                    //if (!name) return;
+                    var e = new DayPilot.Event({
+                        start: args.start,
+                        end: args.end,
+                        id: DayPilot.guid(),
+                        //text: name
+                    });
+                    dp.events.add(e);
+
+                    loadEvents();
+
+                    $.post("settime_create.php",   {
+                        start: args.start.toString(),
+                        end: args.end.toString(),
+                        name: name
+                    }, 
+                    );
+                    loadEvents();
+                };
                 
                 dp.init();
 
                 loadEvents();
 
                 function loadEvents() {
-
-                    dp.events.load("kundeevents.php");
+                    dp.events.load("settime_events.php");
                     
                 }
+
                 
+
+
 
                 // dp.onEventClick = function(args) {
                 //     var modal = new DayPilot.Modal();
                 //     modal.onClosed = function(args) {
                 //         loadEvents();
                 //     };
-                //     modal.showUrl("kundemodal.php?id=" + args.e.id());
+                //     modal.showUrl("modal.php?id=" + args.e.id());
+                    
                 // };
-
-
             </script>
 
-
+           
 
         </div>
         <div class="clear">
-
-           
-            <form id="f" style="padding:20px;" action="pagebooking.php" method="post" enctype="multipart/form-data">
-            <div><input type="hidden" id="status" name="status" value="free" /></div>
-            <h1>Søg behandlingstider</h1>
-            <div>Behandling: </div>
-            
-            <div>Behandlings længde: </div>
-            <select id='time' name="bhtime">
-                <option value="00:15:00">15 min</option>
-                <option value="00:30:00">30 min</option>
-                <option value="00:45:00">45 min</option>
-                <option value="01:00:00">1 time</option>
-                <option value="01:15:00">1 time og 15 min</option>
-                <option value="01:30:00">1 time og 30 min</option>
-                <option value="01:45:00">1 time og 45 min</option>
-                <option value="02:00:00">2 timer</option>
-            </select>
-
-            <!-- <div>Start:</div>
-            <div><input type="text" id="start" name="start" /></div>
-            <div>Slut:</div>
-            <div><input type="text" id="end" name="end" /></div> -->
-            <div class="space"><input type="submit" value="Søg" /> <a href="javascript:close();">Cancel</a></div>
-       
-
         </div>
 
 </body>

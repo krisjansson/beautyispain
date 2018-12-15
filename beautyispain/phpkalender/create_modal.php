@@ -24,23 +24,27 @@
             new DateTime($start) or die("invalid date (start)");
             new DateTime($end) or die("invalid date (end)");
             
-            } else { 
-              
-              echo "You need to login!<br>";
-              echo '<a href="login.php">To login page</a>';
-                
-                
-            }; 
+            
             
         ?>
         <form id="f" style="padding:20px;" action="create.php" method="post" enctype="multipart/form-data">
-            <h1>New Event</h1>
-            <div>Name: </div>
+            <h1>Ny aftale</h1>
+            <div>Beskrivelse: </div>
             <div><input type="text" id="name" name="name" value="" /></div>
             <div>Start:</div>
             <div><input type="text" id="start" name="start" /></div>
-            <div>End:</div>
+            <div>Slut:</div>
             <div><input type="text" id="end" name="end" /></div>
+            <div>Adfær:</div>
+                <select name="behave">
+                    <option value="slet">Slet i booking</option>
+                    <option value="doublebook">Dobbelt-booke</option>
+                </select>
+            <div>Status:</div>
+                <select name="status">
+                    <option value="privat">Privat aftale</option>
+                    <option value="client">Kundeaftale</option>
+                </select>
             
             <div class="space"><input type="submit" value="Save" /> <a href="javascript:close();">Cancel</a></div>
         </form>
@@ -71,5 +75,12 @@
         };       
     
         </script>
+        <?php } else { 
+              
+              echo "You need to login!<br>";
+              echo '<a href="login.php">To login page</a>';
+                
+                
+            }; ?>
     </body>
 </html>
