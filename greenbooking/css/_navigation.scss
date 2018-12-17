@@ -1,0 +1,102 @@
+// Navigation SCSS
+
+.navbar {
+    flex-wrap: nowrap !important;
+    text-align: center !important;
+
+}
+.collapse {
+    margin-top: 1.5rem;
+    height: 100vh;
+    animation-duration: 0.5s;
+}
+.nav-link {
+    border: 1px solid #f5f5f5;
+    border-radius: .25rem;
+    padding: 1rem 0 !important;
+    background-color: rgba(0,0,0,0);
+}
+
+.navbar .active {
+    background-color: rgba(0,0,0,0) !important;
+    border-bottom: 2px solid white;
+}
+.nav-item {
+    margin: 1rem auto;
+    width: 100%;
+}
+
+
+@media only screen and (min-width: 992px) {
+    .navbar-nav {
+        margin-left: 1rem;
+    }
+    .navbar {
+        margin: 1.5rem !important;
+    }
+    .collapse {
+        margin-top: 0;
+        height: 100%;
+    }
+    .nav-item {
+        margin: auto;
+        padding-left: 0 !important;
+    }
+    .nav-link {
+        border: none;
+        border-radius: .25rem !important;
+        padding:.5rem 1rem !important;
+        white-space: nowrap;
+    }
+
+    @keyframes navtop {
+        0% {margin-top: 1.5rem !important;}
+        100% {margin: 0rem; border-radius: 0%}
+    }
+    
+    
+    .top-nav-collapse {
+        margin-top: 1.5rem !important;
+        animation-name: navtop;
+        animation-duration: 0.5s;
+        animation-fill-mode: forwards;
+        animation-timing-function: ease;
+    }
+
+}
+
+.navbar-default .navbar-toggle:focus,
+.navbar-default .navbar-toggle:hover {
+    background-color: transparent;
+}
+
+.navbar-default .navbar-toggle {
+    border: none;
+}
+
+.navbar-toggle span.icon-bar {
+    transition: all 0.15s;
+}
+
+.navbar-toggle span:nth-child(2) {
+    transform: rotate(45deg);
+    transform-origin: 10% 10%;
+}
+
+.navbar-toggle span:nth-child(3) {
+    opacity: 0;
+}
+
+.navbar-toggle span:nth-child(4) {
+    transform: rotate(-45deg);
+    transform-origin: 10% 90%;
+}
+
+.navbar-toggle.collapsed span:nth-child(2),
+.navbar-toggle.collapsed span:nth-child(4) {
+    transform: rotate(0);
+}
+
+.navbar-toggle.collapsed span:nth-child(3) {
+    opacity: 1;
+}
